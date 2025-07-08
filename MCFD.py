@@ -10,6 +10,12 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 class param:
+    """
+    A parameter to be fit, called 'name'.
+    Low and High are uniform prior bounds.
+    Start is intial guess.
+    Step_size controls the gaussian sampler for how large a step the parameter can walk each iteration
+    """
     def __init__(self,name,low,high,start,step_size):
         self.name=name
         self.low=low
@@ -32,7 +38,13 @@ class param:
         return(self.uniform_prob(self.proposed))
     
 class explore:
-    
+    """
+    Actual object called for a MCMC fitting run. 
+    xs,ys is data points to be fitted.
+    model_func is the function to be fitted too. Can be a simple equation, or an entire python function.
+    Theta is the parameters of the model_func, plus the variable sigma for the likelihood function, which is also fitted.
+    Currently, MCFD assumes all model parameters need to be fitted, might change this in the future.
+    """
     def __init__(self,xs,ys,model_func,theta):
         self.xs=xs
         self.ys=ys
@@ -45,6 +57,9 @@ class explore:
         self.post_list=[]
     
     def burn(self,tests):
+        """
+        Burn-in phase, basically is the same as 'run' but deletes the chain and failure rate once done
+        """
         print("--- BURN IN PHASE ---")
         for n in tqdm(range(0,tests)):
             self.step()
@@ -60,6 +75,9 @@ class explore:
         
         
     def run(self,tests,print_out):
+        """
+        Actual run cycle, takes the number of cycles to do and a true/false on whether or not to print out the final fitted values when complete.
+        """
         print("--- RUN PHASE ---")
         for n in tqdm(range (0,tests)):
             self.step()
@@ -136,6 +154,10 @@ class explore:
         self.post_last=post
         
 class multirun:
+    """
+    Experimental multi-walker wrapper.
+    Designed to allow for multiple starting values/walkers to be intitilised and left to run, before averaging out the final result
+    """
     def __init__(self,walkers,func,xs,ys,theta):
         self.chains=walkers
         self.explorers=[]
